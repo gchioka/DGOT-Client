@@ -225,7 +225,7 @@
     NSScreen* screen = [window screen];
     if (screen) {
         NSRect screenFrame = [screen frame];
-        int y = static_cast<int>(screenFrame.size.height - frame.origin.y - frame.size.height);
+        int y = static_cast<int>(screenFrame.origin.y + screenFrame.size.height - frame.origin.y - frame.size.height);
         _platformWindow->handleMove(static_cast<int>(frame.origin.x), y);
     }
 }

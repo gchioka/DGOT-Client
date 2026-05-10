@@ -41,9 +41,6 @@ jobs:
       pull-requests: read
     name: ${{ matrix.os }}-${{ matrix.buildtype }}
     runs-on: ${{ matrix.os }}
-    env:
-      ACTIONS_RUNTIME_TOKEN: ${{ secrets.ACTIONS_RUNTIME_TOKEN }}
-      ACTIONS_CACHE_URL: ${{ secrets.ACTIONS_CACHE_URL }}
 
     concurrency:
       group: otclient-${{ github.workflow }}-${{ github.ref }}-${{ matrix.buildtype }}
@@ -60,11 +57,18 @@ jobs:
             cmake_build_type: Release
 
     steps:
-      - name: Checkout repository
+      - name: Checkout pull request
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event_name == 'push' && github.repository || github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event_name == 'push' && github.ref || github.event.pull_request.head.ref || github.head_ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Checkout repository
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - name: Get vcpkg commit ID

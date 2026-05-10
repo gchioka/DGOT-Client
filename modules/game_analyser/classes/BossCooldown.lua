@@ -179,7 +179,7 @@ function BossCooldown:checkTicks()
 	local needUpdate = false
 	for _, widget in ipairs(self.widgets) do
 		layout:enableUpdates()
-		if self.search == "" or string.find(widget.name:lower(), self.search:lower()) then
+		if self.search == "" or string.find(widget.name:lower(), self.search:lower(), 1, true) then
 			widget:setVisible(true)
 		else
 			widget:setVisible(false)
@@ -369,7 +369,7 @@ function BossCooldown:setupCooldown(cooldown)
 end
 
 function checkBossSearch(text)
-	if #text <= 1 then
+	if not text or #text <= 1 then
 		BossCooldown.search = ""
 	else
 		BossCooldown.search = text
@@ -381,7 +381,7 @@ function checkBossSearch(text)
 		if layout then
 			layout:enableUpdates()
 			for _, widget in ipairs(BossCooldown.widgets) do
-				if BossCooldown.search == "" or string.find(widget.name:lower(), BossCooldown.search:lower()) then
+				if BossCooldown.search == "" or string.find(widget.name:lower(), BossCooldown.search:lower(), 1, true) then
 					widget:setVisible(true)
 				else
 					widget:setVisible(false)
