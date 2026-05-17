@@ -5,13 +5,13 @@ function UIDragIcon:display(item)
     if modules.client_options.getOption('showDragIcon') then
         if uiIcon == nil then
             uiIcon = g_ui.createWidget('UIDragIcon', rootWidget)
-            uiIcon:setVirtual(true)
-            uiIcon:setShowCount(false)
+            pcall(function() uiIcon:setVirtual(true) end)
+            pcall(function() uiIcon:setShowCount(false) end)
         end
-        
-        uiIcon:setItem(item)
+
+        pcall(function() uiIcon:setItem(item) end)
         uiIcon:show()
-        
+
         connect(rootWidget, { onMouseMove = onMouseMove })
     end
 end

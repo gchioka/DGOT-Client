@@ -50,7 +50,7 @@ local function load(version)
             errorList[#errorList + 1] = "Couldn't load assets"
         end
         if not g_things.loadStaticData(filePath) then
-            errorList[#errorList + 1] = "Couldn't load staticdata"
+            g_logger.warning("Couldn't load staticdata (optional, skipping)")
         end
     else
         local datPath, sprPath

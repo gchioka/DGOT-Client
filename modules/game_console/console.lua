@@ -804,10 +804,10 @@ function removeTab(tab)
     end
 
     if tab == violationReportTab then
-        g_game.cancelRuleViolation()
+        if g_game.cancelRuleViolation then g_game.cancelRuleViolation() end
         violationReportTab = nil
     elseif tab.violationChatName then
-        g_game.closeRuleViolation(tab.violationChatName)
+        if g_game.closeRuleViolation then g_game.closeRuleViolation(tab.violationChatName) end
     elseif tab.channelId then
         if tab.ownerPrivateChannel or tab.channelId == OWNER_CHANNEL_ID then
             ownPrivateName = nil
@@ -1898,7 +1898,7 @@ function processViolation(name, text)
     local tab = addTab(tabname, true)
     channels[tabname] = tabname
     tab.violationChatName = name
-    g_game.openRuleViolation(name)
+    if g_game.openRuleViolation then g_game.openRuleViolation(name) end
     addTabText(text, SpeakTypesSettings.say, tab, name)
 end
 
@@ -2306,7 +2306,7 @@ function consoleController:onGameStart()
         }, gameRootPanel)
     end
     if clientVersion > 1100 then
-        local active = g_game.canExivaOptions()
+        local active = g_game.canExivaOptions and g_game.canExivaOptions() or false
         local widget = consolePanel:getChildById('exivaOption')
         if widget then
             widget:setTooltip(

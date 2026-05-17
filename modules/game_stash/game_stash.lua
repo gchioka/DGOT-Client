@@ -343,7 +343,7 @@ local function createItemBox(entry)
     itemBox.name = meta.name
     itemBox.thingType = meta.thingType
     itemWidget:setItemId(entry.itemId)
-    itemWidget:setDisplayCount(entry.amount)
+    if itemWidget.setDisplayCount then itemWidget:setDisplayCount(entry.amount) end
     ItemsDatabase.setRarityItem(itemWidget, entry.itemId)
     itemBox:setTooltip(#meta.name > 0 and string.format("Name: %s \nCount: %d", meta.name, entry.amount) or "Loading...")
 end
@@ -445,12 +445,12 @@ function prepareWithdraw(itemId, itemAmount)
     local itembox = W.modal.selectAmount:getChildById('item')
     local scrollbar = W.modal.selectAmount:getChildById('countScrollBar')
     itembox:setItemId(itemId)
-    itembox:setDisplayCount(itemAmount)
+    if itembox.setDisplayCount then itembox:setDisplayCount(itemAmount) end
     scrollbar:setMaximum(itemAmount)
     scrollbar:setMinimum(1)
     scrollbar:setValue(itemAmount)
     scrollbar.onValueChange = function(_, value)
-        itembox:setDisplayCount(value)
+        if itembox.setDisplayCount then itembox:setDisplayCount(value) end
     end
     g_keyboard.bindKeyPress('Up', function()
         scrollbar:setValue(scrollbar:getValue() + 10)

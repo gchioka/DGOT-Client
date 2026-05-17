@@ -187,7 +187,7 @@ end
 
 function InspectController:isItemCyclopediaable()
     local item = self.state and self.state.activeItem
-    return item ~= nil and modules.game_cyclopedia ~= nil and item:getCyclopediaType() > 0
+    return item ~= nil and modules.game_cyclopedia ~= nil and item.getCyclopediaType ~= nil and item:getCyclopediaType() > 0
 end
 
 function InspectController:isItemProficiencyable()

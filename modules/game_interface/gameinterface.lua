@@ -285,7 +285,7 @@ function show()
     end
 
     setupViewMode(0)
-    if g_platform.isMobile() or g_gameConfig.isExtendedViewUI() then
+    if g_platform.isMobile() then
         setupViewMode(1)
         setupViewMode(2)
     end
@@ -628,13 +628,13 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
         if clientVersion >= 1281 and modules.game_inspect and (lookThing:isCreature() or canInspect) then
             menu:addOption(tr('Inspect'), function()
                 if lookThing:isCreature() then
-                    g_game.inspectCharacter(lookThing:getId(), InspectCreaturesTypes.INSPECT_CREATURE)
+                    if g_game.inspectCharacter then g_game.inspectCharacter(lookThing:getId(), InspectCreaturesTypes.INSPECT_CREATURE) end
                 elseif canInspect then
-                    g_game.inspectionNormalObject(lookThing:getPosition())
+                    if g_game.inspectionNormalObject then g_game.inspectionNormalObject(lookThing:getPosition()) end
                 end
             end, shortcut)
         end
-        if clientVersion >= 1310 and canInspect and modules.game_cyclopedia and lookThing:getCyclopediaType() > 0 then
+        if clientVersion >= 1310 and canInspect and modules.game_cyclopedia and lookThing.getCyclopediaType and lookThing:getCyclopediaType() > 0 then
             menu:addOption(tr('Cyclopedia'), function()
                 modules.game_cyclopedia.Cyclopedia.openItem(lookThing:getId())
             end, shortcut)

@@ -31,7 +31,7 @@ local function isPlayerMonk()
     if not player then
         return false
     end
-    return player:isMonk()
+    return player.isMonk and player:isMonk() or false
 end
 
 local function updateMonkMirrorItem(leftItem)
@@ -71,7 +71,7 @@ local function updateMonkMirrorItem(leftItem)
         shieldItemWidget:setOpacity(0.5)
         shieldItemWidget:setDraggable(false)
         shieldItemWidget:setEnabled(false)
-        shieldItemWidget:setFlipDirection(FlipDirection.Horizontal)
+        if shieldItemWidget.setFlipDirection then shieldItemWidget:setFlipDirection(FlipDirection.Horizontal) end
         shieldSlot.shield:setEnabled(false)
     else
         monkMirrorItem = nil
@@ -79,7 +79,7 @@ local function updateMonkMirrorItem(leftItem)
         shieldItemWidget:setOpacity(1.0)
         shieldItemWidget:setDraggable(true)
         shieldItemWidget:setEnabled(true)
-        shieldItemWidget:setFlipDirection(FlipDirection.None)
+        if shieldItemWidget.setFlipDirection then shieldItemWidget:setFlipDirection(FlipDirection.None) end
         shieldSlot.shield:setEnabled(true)
         if shieldItemWidget.tier then
             shieldItemWidget.tier:setVisible(false)
@@ -132,7 +132,7 @@ local function inventoryEvent(player, slot, item, oldItem)
         slotPanel.item:setOpacity(1.0)
         slotPanel.item:setDraggable(true)
         slotPanel.item:setEnabled(true)
-        slotPanel.item:setFlipDirection(FlipDirection.None)
+        if slotPanel.item.setFlipDirection then slotPanel.item:setFlipDirection(FlipDirection.None) end
         monkMirrorItem = nil
     end
 
@@ -143,8 +143,8 @@ local function inventoryEvent(player, slot, item, oldItem)
     slotPanel.item:setWidth(34)
     slotPanel.item:setHeight(34)
     
-    slotPanel.item:setShowDuration(g_game.getFeature(GameThingClock) and modules.client_options.getOption('showExpiryInInvetory'))
-    slotPanel.item:setShowCharges(g_game.getFeature(GameThingCounter) and modules.client_options.getOption('showExpiryInInvetory'))
+    pcall(function() slotPanel.item:setShowDuration(g_game.getFeature(GameThingClock) and modules.client_options.getOption('showExpiryInInvetory')) end)
+    pcall(function() slotPanel.item:setShowCharges(g_game.getFeature(GameThingCounter) and modules.client_options.getOption('showExpiryInInvetory')) end)
     ItemsDatabase.setTier(slotPanel.item, item)
 
     if slot == InventorySlotLeft then

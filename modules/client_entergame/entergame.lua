@@ -257,7 +257,7 @@ function EnterGame.init()
             end
 
             ServerList.save()
-            g_configs.saveSettings()
+            if g_configs.saveSettings then g_configs.saveSettings() end
         end
     })
 

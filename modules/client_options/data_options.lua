@@ -289,7 +289,7 @@ return {
     displayHarmony                     = {
         value = true,
         action = function(value, options, controller, panels, extraWidgets)
-            panels.gameMapPanel:setDrawHarmony(value)
+            pcall(function() panels.gameMapPanel:setDrawHarmony(value) end)
         end
     },
     displayText                       = {
@@ -337,8 +337,8 @@ return {
                 newValue = nil
             end
 
-            panels.gameMapPanel:setCrosshairTexture(newValue and crossPath .. newValue or nil)
-            panels.interface:recursiveGetChildById('crosshair'):setCurrentOptionByData(newValue, true)
+            pcall(function() panels.gameMapPanel:setCrosshairTexture(newValue and crossPath .. newValue or nil) end)
+            pcall(function() panels.interface:recursiveGetChildById('crosshair'):setCurrentOptionByData(newValue, true) end)
         end
     },
     nativeCursor = {
@@ -349,7 +349,7 @@ return {
                 if options.showAnimatedCursor.value then
                     options.showAnimatedCursor.value = false
                     g_settings.set('showAnimatedCursor', false)
-                    panels.gameMapPanel:setCursorAnimations(false)
+                    pcall(function() panels.gameMapPanel:setCursorAnimations(false) end)
                     -- Update the UI checkbox
                     local widget = panels.interface:recursiveGetChildById('showAnimatedCursor')
                     if widget then
@@ -357,13 +357,13 @@ return {
                     end
                 end
                 -- Set native cursor mode flag
-                g_mouse.setUseNativeCursor(true)
+                if g_mouse.setUseNativeCursor then g_mouse.setUseNativeCursor(true) end
                 -- Push cursor to mark as changed (prevents game from overriding)
                 g_mouse.pushCursor('window')
                 -- Then restore to native Windows cursor
                 g_window.restoreMouseCursor()
             else
-                g_mouse.setUseNativeCursor(false)
+                if g_mouse.setUseNativeCursor then g_mouse.setUseNativeCursor(false) end
                 g_mouse.popCursor('window')
             end
         end
@@ -371,7 +371,7 @@ return {
     enableHighlightMouseTarget        = {
         value = true,
         action = function(value, options, controller, panels, extraWidgets)
-            panels.gameMapPanel:setDrawHighlightTarget(value)
+            pcall(function() panels.gameMapPanel:setDrawHighlightTarget(value) end)
         end
     },
     showAnimatedCursor = {
@@ -390,7 +390,7 @@ return {
                     end
                 end
             end
-            panels.gameMapPanel:setCursorAnimations(value)
+            pcall(function() panels.gameMapPanel:setCursorAnimations(value) end)
         end
     },
     showDragIcon        = {
@@ -636,7 +636,7 @@ return {
                 removeEvent(options.showExpiryInInvetory.event)
             end
             options.showExpiryInInvetory.event = scheduleEvent(function()
-                modules.game_inventory.reloadInventory()
+                if modules.game_inventory then modules.game_inventory.reloadInventory() end
                 options.showExpiryInInvetory.event = nil
             end, 100)
         end
