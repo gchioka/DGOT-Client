@@ -1214,6 +1214,13 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
         local lootControlMode = modules.client_options.getOption('lootControlMode')
         local player = g_game.getLocalPlayer()
 
+        -- Right-click on local player always shows context menu (outfit, mount, etc.)
+        if mouseButton == MouseRightButton and keyboardModifiers == KeyboardNoModifier
+            and creatureThing and creatureThing:isLocalPlayer() then
+            createThingMenu(menuPosition, lookThing, useThing, creatureThing)
+            return true
+        end
+
         -- ###############################
         -- ### MODE 0: LOOT RIGHT CLICK ##
         -- ###############################
