@@ -724,27 +724,32 @@ function EnterGame.loginSuccess(requestId, jsonSession, jsonWorlds, jsonCharacte
     end
 
     local characters = {}
-    for index, character in ipairs(json.decode(jsonCharacters)) do
-        local world = worlds[character.worldid]
-        characters[index] = {
-            name = character.name,
-            level = character.level,
-            main = character.ismaincharacter,
-            dailyreward = character.dailyrewardstate,
-            hidden = character.ishidden,
-            vocation = character.vocation,
-            outfitid = character.outfitid,
-            headcolor = character.headcolor,
-            torsocolor = character.torsocolor,
-            legscolor = character.legscolor,
-            detailcolor = character.detailcolor,
-            addonsflags = character.addonsflags,
-            worldName = world.name,
-            worldIp = world.ip,
-            worldPort = world.port,
-            previewState = world.previewstate,
-            pvptype = world.pvptype,
-        }
+    local decodedChars = json.decode(jsonCharacters)
+    if decodedChars and type(decodedChars) == 'table' then
+        for index, character in ipairs(decodedChars) do
+            local world = worlds[character.worldid]
+            if world then
+                characters[index] = {
+                    name = character.name,
+                    level = character.level,
+                    main = character.ismaincharacter,
+                    dailyreward = character.dailyrewardstate,
+                    hidden = character.ishidden,
+                    vocation = character.vocation,
+                    outfitid = character.outfitid,
+                    headcolor = character.headcolor,
+                    torsocolor = character.torsocolor,
+                    legscolor = character.legscolor,
+                    detailcolor = character.detailcolor,
+                    addonsflags = character.addonsflags,
+                    worldName = world.name,
+                    worldIp = world.ip,
+                    worldPort = world.port,
+                    previewState = world.previewstate,
+                    pvptype = world.pvptype,
+                }
+            end
+        end
     end
 
     local session = json.decode(jsonSession)

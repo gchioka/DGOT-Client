@@ -42,6 +42,9 @@ local function tryLoadDatWithFallbacks(datPath)
 end
 
 local function load(version)
+    -- version=0 é estado inicial/reset interno, não há assets para carregar
+    if version == 0 then return end
+
     local errorList = {}
 
     if version >= 1281 and not g_game.getFeature(GameLoadSprInsteadProtobuf) then
