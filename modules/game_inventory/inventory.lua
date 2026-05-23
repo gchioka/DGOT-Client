@@ -132,7 +132,7 @@ local function inventoryEvent(player, slot, item, oldItem)
         slotPanel.item:setOpacity(1.0)
         slotPanel.item:setDraggable(true)
         slotPanel.item:setEnabled(true)
-        if slotPanel.item.setFlipDirection then slotPanel.item:setFlipDirection(FlipDirection.None) end
+        pcall(function() if slotPanel.item.setFlipDirection then slotPanel.item:setFlipDirection(FlipDirection.None) end end)
         monkMirrorItem = nil
     end
 

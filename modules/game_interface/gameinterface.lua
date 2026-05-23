@@ -634,10 +634,13 @@ function createThingMenu(menuPosition, lookThing, useThing, creatureThing)
                 end
             end, shortcut)
         end
-        if clientVersion >= 1310 and canInspect and modules.game_cyclopedia and lookThing.getCyclopediaType and lookThing:getCyclopediaType() > 0 then
-            menu:addOption(tr('Cyclopedia'), function()
-                modules.game_cyclopedia.Cyclopedia.openItem(lookThing:getId())
-            end, shortcut)
+        if clientVersion >= 1310 and canInspect and modules.game_cyclopedia and lookThing.getCyclopediaType then
+            local _ok, _cycType = pcall(function() return lookThing:getCyclopediaType() end)
+            if _ok and (_cycType or 0) > 0 then
+                menu:addOption(tr('Cyclopedia'), function()
+                    modules.game_cyclopedia.Cyclopedia.openItem(lookThing:getId())
+                end, shortcut)
+            end
         end
         if clientVersion >= 1511 and modules.game_proficiency and lookThing:getProficiencyId() > 0 then
             menu:addOption(tr("Weapon Proficiency"), function()
@@ -1214,9 +1217,10 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
         local lootControlMode = modules.client_options.getOption('lootControlMode')
         local player = g_game.getLocalPlayer()
 
-        -- Right-click on local player always shows context menu (outfit, mount, etc.)
+        -- Right-click on local player shows context menu (outfit, mount, etc.)
+        -- but only when there's no usable item on the tile (e.g. stairs), to avoid conflict
         if mouseButton == MouseRightButton and keyboardModifiers == KeyboardNoModifier
-            and creatureThing and creatureThing:isLocalPlayer() then
+            and creatureThing and creatureThing:isLocalPlayer() and not useThing then
             createThingMenu(menuPosition, lookThing, useThing, creatureThing)
             return true
         end
@@ -1461,8 +1465,7 @@ function processMouseAction(menuPosition, mouseButton, autoWalkPos, lookThing, u
                 (g_mouse.isPressed(MouseRightButton) and mouseButton == MouseLeftButton)) then
             g_game.look(lookThing)
             return true
-        elseif useThing and g_keyboard.isPrimaryModifierOnly(keyboardModifiers) and
-            (mouseButton == MouseLeftButton or mouseButton == MouseRightButton) then
+        elseif keyboardModifiers == KeyboardCtrlModifier and mouseButton == MouseRightButton then
             createThingMenu(menuPosition, lookThing, useThing, creatureThing)
             return true
         elseif attackCreature and not attackCreature:isNpc() and g_keyboard.isAltPressed() and
