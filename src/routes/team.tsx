@@ -14,10 +14,10 @@ export const Route = createFileRoute("/team")({
 const team = [
   { name: "DGOT", role: "Founder & Administrator", world: "all", color: "var(--gold-bright)" },
   { name: "Archmage Solrik", role: "Senior Developer", world: "all", color: "var(--royal-deep)" },
-  { name: "Sister Vanya", role: "Senior Game Master", world: "Grimoria", color: "var(--ember)" },
-  { name: "Brother Hadrian", role: "Game Master", world: "Targuna", color: "var(--ember)" },
+  { name: "Sister Vanya", role: "Senior Game Master", world: "all", color: "var(--ember)" },
+  { name: "Brother Hadrian", role: "Game Master", world: "all", color: "var(--ember)" },
   { name: "Lady Mireille", role: "Community Manager", world: "all", color: "var(--royal-deep)" },
-  { name: "Tutor Klein", role: "Senior Tutor", world: "DGOT", color: "var(--gold)" },
+  { name: "Tutor Klein", role: "Senior Tutor", world: "all", color: "var(--gold)" },
 ];
 
 function TeamPage() {

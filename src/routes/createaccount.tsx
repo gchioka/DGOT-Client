@@ -186,7 +186,7 @@ const CreateAccountContent = memo(function CreateAccountContent() {
           </div>
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <Link to="/login" className="btn-gold pixel-text text-[10px]">▶ Entrar</Link>
-            <Link to="/downloads" className="btn-royal pixel-text text-[9px]">⬇ Download Client</Link>
+            <a href="/dl/DGOT-Client.zip" download className="btn-royal pixel-text text-[9px]">⬇ Download Client</a>
           </div>
         </div>
       </PageBox>

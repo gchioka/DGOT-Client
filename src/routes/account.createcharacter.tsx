@@ -6,8 +6,8 @@ import { createCharacterApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const TOWN_OPTIONS = [
-  { value: "9",  label: "Thais",      img: "/town-thais.png",     desc: "A grande capital humana" },
-  { value: "11", label: "Ankrahmun",  img: "/town-ankrahmun.png", desc: "Cidade do deserto" },
+  { value: "8",  label: "Thais",      img: "/town-thais.webp",    desc: "A grande capital humana" },
+  { value: "13", label: "Darashia",   img: "/town-darashia.webp", desc: "Cidade do deserto" },
 ];
 
 export const Route = createFileRoute("/account/createcharacter")({
@@ -52,10 +52,10 @@ function CreateCharacterForm() {
     setError("");
     const fd = new FormData(formRef.current!);
     const name     = (fd.get("name")     as string).trim();
-    const sex      = parseInt(fd.get("sex")      as string) || 1;
+    const sex      = fd.get("sex") === "0" ? 0 : 1;
     const vocation = fd.get("vocation")  as string || "4";
     const world    = fd.get("world")     as string || "DGOT";
-    const town     = parseInt(fd.get("town") as string) || 9;
+    const town     = parseInt(fd.get("town") as string) || 8;
 
     setLoading(true);
     try {

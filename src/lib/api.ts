@@ -348,7 +348,7 @@ export function changeMainApi(token: string, character: string, password: string
   return accountPost(token, "changemain", { character, password });
 }
 
-export function createCharacterApi(token: string, name: string, sex: number, vocation: string, world: string, town: number = 9): Promise<AccountActionResponse> {
+export function createCharacterApi(token: string, name: string, sex: number, vocation: string, world: string, town: number = 8): Promise<AccountActionResponse> {
   return accountPost(token, "createcharacter", { name, sex, vocation, world, town });
 }
 
