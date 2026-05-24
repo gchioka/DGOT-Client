@@ -1,0 +1,268 @@
+name: DGOT Client Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag da release (ex: v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  build-and-release:
+    name: Build & Package DGOT Client
+    runs-on: windows-2025
+
+    env:
+      VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite;nugettimeout,600"
+      VCPKG_NUGET_REPOSITORY: https://github.com/${{ github.repository }}.git
+      VCPKG_NUGET_API_KEY: ${{ github.token }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      # ── Toolchain ────────────────────────────────────────────────────────────
+
+      - name: Install VS 2026 Build Tools (v145 toolset)
+        shell: pwsh
+        run: |
+          $acceptedExitCodes = @(0, 3010)
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            choco install visualstudio2026-workload-vctools --yes --ignore-package-exit-codes=3010 --no-progress
+            if ($acceptedExitCodes -contains $LASTEXITCODE) { exit 0 }
+            Write-Warning "Tentativa $attempt falhou com código $LASTEXITCODE"
+            if ($attempt -lt 3) { Start-Sleep -Seconds (30 * $attempt) }
+          }
+          Write-Warning "Aviso: instalação pode ter falhado, continuando com toolset disponível."
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+        with:
+          vs-prerelease: true
+          vs-version: "latest"
+
+      # ── Source ───────────────────────────────────────────────────────────────
+
+      - name: Checkout (branch game-client)
+        uses: actions/checkout@v6
+        with:
+          ref: game-client
+
+      - name: Export GitHub Actions cache variables
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Read vcpkg baseline
+        shell: pwsh
+        run: |
+          $json = Get-Content vcpkg.json -Raw | ConvertFrom-Json
+          "VCPKG_GIT_COMMIT_ID=$($json.'builtin-baseline')" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      # ── vcpkg / NuGet ────────────────────────────────────────────────────────
+
+      - name: Configure NuGet source (GitHub Packages)
+        shell: pwsh
+        env:
+          NUGET_AUTH_TOKEN: ${{ env.VCPKG_NUGET_API_KEY }}
+        run: |
+          $feed = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          $nuget = (Get-Command nuget.exe -ErrorAction SilentlyContinue).Source
+          if (-not $nuget) { throw "nuget.exe não encontrado no PATH" }
+          & $nuget sources remove -Name "GitHubPackages" 2>&1 | Out-Null
+          & $nuget sources add `
+            -Name "GitHubPackages" `
+            -Source $feed `
+            -UserName "${{ github.repository_owner }}" `
+            -Password "$env:NUGET_AUTH_TOKEN" `
+            -StorePasswordInClearText
+          & $nuget setapikey "$env:NUGET_AUTH_TOKEN" -Source $feed
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: ${{ format('{0}/vcpkg', github.workspace) }}
+          vcpkgGitURL: "https://github.com/microsoft/vcpkg.git"
+          vcpkgGitCommitId: ${{ env.VCPKG_GIT_COMMIT_ID }}
+
+      # ── Encryption password ───────────────────────────────────────────────────
+
+      - name: Inject DGOT_ENCRYPTION_PASSWORD into config.h
+        shell: pwsh
+        run: |
+          $configPath = "src/framework/config.h"
+          $content = Get-Content $configPath -Raw
+          $password = "${{ secrets.DGOT_ENCRYPTION_PASSWORD }}"
+          if ($password.Length -lt 100) {
+            Write-Error "DGOT_ENCRYPTION_PASSWORD deve ter pelo menos 100 caracteres. Configure o secret no repositório."
+            exit 1
+          }
+          $content = $content -replace 'DGOT_PASSWORD_PLACEHOLDER', $password
+          Set-Content $configPath $content -Encoding utf8
+          Write-Host "Senha injetada com sucesso ($($password.Length) chars)."
+
+      # ── Data assets ──────────────────────────────────────────────────────────
+
+      - name: Download data assets (tag: data-assets)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download data-assets `
+            --pattern "dgot-data-assets.zip" `
+            --dir "${{ github.workspace }}" `
+            --repo "${{ github.repository }}"
+          Write-Host "Extraindo dgot-data-assets.zip..."
+          Expand-Archive -Path "dgot-data-assets.zip" -DestinationPath "${{ github.workspace }}" -Force
+          Write-Host "Assets extraídos."
+
+      # ── Phase 1: Build encryption BUILDER ────────────────────────────────────
+
+      - name: Phase 1 — Ativar ENABLE_ENCRYPTION_BUILDER no config.h
+        shell: pwsh
+        run: |
+          $configPath = "src/framework/config.h"
+          $content = Get-Content $configPath -Raw
+          $content = $content -replace '#define ENABLE_ENCRYPTION_BUILDER 0', '#define ENABLE_ENCRYPTION_BUILDER 1'
+          Set-Content $configPath $content -Encoding utf8
+
+      - name: Phase 1 — Compilar encryption builder (MSBuild DirectX x64)
+        shell: pwsh
+        run: |
+          $vcpkgRoot = Join-Path (Get-Location) "vcpkg"
+          $outDir    = Join-Path (Get-Location) "artifacts\builder"
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+
+          msbuild.exe vc18/otclient.sln `
+            /m `
+            /p:Configuration=DirectX `
+            /p:Platform=x64 `
+            /p:VcpkgEnableManifest=true `
+            /p:VcpkgRoot="$vcpkgRoot" `
+            /p:OutDir="$outDir\\"
+
+      - name: Phase 1 — Criptografar arquivos de módulos
+        shell: pwsh
+        run: |
+          $builderExe = Join-Path (Get-Location) "artifacts\builder\otclient_dx_x64.exe"
+          if (-not (Test-Path $builderExe)) {
+            throw "Builder não encontrado em: $builderExe"
+          }
+          Write-Host "Iniciando criptografia de módulos..."
+          # Roda na raiz do workspace para que o builder encontre modules/ e mods/
+          Push-Location "${{ github.workspace }}"
+          & $builderExe --encrypt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Builder retornou código de erro: $LASTEXITCODE"
+          }
+          Pop-Location
+          Write-Host "Criptografia concluída."
+
+      # ── Phase 2: Build final encrypted client ────────────────────────────────
+
+      - name: Phase 2 — Ativar ENABLE_ENCRYPTION no config.h
+        shell: pwsh
+        run: |
+          $configPath = "src/framework/config.h"
+          $content = Get-Content $configPath -Raw
+          $content = $content -replace '#define ENABLE_ENCRYPTION_BUILDER 1', '#define ENABLE_ENCRYPTION_BUILDER 0'
+          $content = $content -replace '#define ENABLE_ENCRYPTION 0',         '#define ENABLE_ENCRYPTION 1'
+          Set-Content $configPath $content -Encoding utf8
+
+      - name: Phase 2 — Compilar client final (MSBuild DirectX x64)
+        shell: pwsh
+        run: |
+          $vcpkgRoot = Join-Path (Get-Location) "vcpkg"
+          $outDir    = Join-Path (Get-Location) "artifacts\final"
+          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+
+          msbuild.exe vc18/otclient.sln `
+            /m `
+            /p:Configuration=DirectX `
+            /p:Platform=x64 `
+            /p:VcpkgEnableManifest=true `
+            /p:VcpkgRoot="$vcpkgRoot" `
+            /p:OutDir="$outDir\\"
+
+      # ── Package ───────────────────────────────────────────────────────────────
+
+      - name: Montar pacote de distribuição
+        shell: pwsh
+        run: |
+          $tag  = "${{ github.event.inputs.release_tag }}"
+          $dist = Join-Path (Get-Location) "DGOT-Client"
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+
+          # Executável principal (renomeado para DGOT.exe)
+          Copy-Item "artifacts\final\otclient_dx_x64.exe" "$dist\DGOT.exe"
+
+          # DLLs necessárias (saída do MSBuild)
+          Get-ChildItem "artifacts\final\*.dll" -ErrorAction SilentlyContinue |
+            ForEach-Object { Copy-Item $_.FullName "$dist\" }
+
+          # Módulos criptografados
+          if (Test-Path "modules") {
+            Copy-Item "modules" "$dist\modules" -Recurse -Force
+          }
+
+          # Mods (excluindo game_bot — sem bot na versão oficial)
+          if (Test-Path "mods") {
+            New-Item -ItemType Directory -Force -Path "$dist\mods" | Out-Null
+            Get-ChildItem "mods" -Directory |
+              Where-Object { $_.Name -ne "game_bot" } |
+              ForEach-Object { Copy-Item $_.FullName "$dist\mods\$($_.Name)" -Recurse -Force }
+            # README se existir
+            if (Test-Path "mods\README.txt") {
+              Copy-Item "mods\README.txt" "$dist\mods\" -Force
+            }
+          }
+
+          # Assets de data (appearances, etc.)
+          if (Test-Path "data") {
+            Copy-Item "data" "$dist\data" -Recurse -Force
+          }
+
+          # Arquivos raiz
+          foreach ($f in @("otclientrc.lua", "init.lua", "meta.lua")) {
+            if (Test-Path $f) { Copy-Item $f "$dist\" -Force }
+          }
+
+          # Compactar
+          $zipName = "DGOT-Client-$tag.zip"
+          Compress-Archive -Path "$dist\*" -DestinationPath $zipName -Force
+          $sizeMB = [math]::Round((Get-Item $zipName).Length / 1MB, 1)
+          Write-Host "Pacote criado: $zipName ($sizeMB MB)"
+
+      # ── Release ───────────────────────────────────────────────────────────────
+
+      - name: Criar GitHub Release e publicar pacote
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag     = "${{ github.event.inputs.release_tag }}"
+          $zipName = "DGOT-Client-$tag.zip"
+
+          gh release create "$tag" "$zipName" `
+            --repo "${{ github.repository }}" `
+            --title "DGOT Client $tag" `
+            --notes @"
+          ## DGOT Client $tag
+
+          ### Como instalar
+          1. Baixe o arquivo `DGOT-Client-$tag.zip`
+          2. Extraia em qualquer pasta
+          3. Execute **DGOT.exe**
+
+          ### Requisitos
+          - Windows 10 ou superior (64-bit)
+          - DirectX 11
+
+          > Versão compilada em $(Get-Date -Format 'dd/MM/yyyy') — Servidor de Teste DGOT
+          "@ `
+            --latest

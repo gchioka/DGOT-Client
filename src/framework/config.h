@@ -38,9 +38,9 @@ static constexpr float DEFAULT_DISPLAY_DENSITY = 1.f;
 // You can compile it once and use this executable to only encrypt client files once with command --encrypt which will be using password below.
 #define ENABLE_ENCRYPTION_BUILDER 0
 // for security reasons make sure you are using password with at last 100+ characters
-#define ENCRYPTION_PASSWORD AY_OBFUSCATE("SET_YOUR_PASSWORD_HERE")
+#define ENCRYPTION_PASSWORD AY_OBFUSCATE("DGOT_PASSWORD_PLACEHOLDER")
 // do not insert special characters in the header (ONLY UPPERCASE LETTERS, LOWERCASE LETTERS AND NUMBERS) | example: #define ENCRYPTION_HEADER AY_OBFUSCATE("21UsO5ARfRnIScs415BNMab")
-#define ENCRYPTION_HEADER AY_OBFUSCATE("SET_YOUR_HEADER_HERE")
+#define ENCRYPTION_HEADER AY_OBFUSCATE("DGOTClient260524")
 
 // DISCORD RPC (https://discord.com/developers/applications)
 // Enable Discord Rich Presence
