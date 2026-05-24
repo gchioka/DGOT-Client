@@ -247,22 +247,27 @@ jobs:
         run: |
           $tag     = "${{ github.event.inputs.release_tag }}"
           $zipName = "DGOT-Client-$tag.zip"
+          $today   = Get-Date -Format 'dd/MM/yyyy'
+
+          # Escrever release notes em arquivo separado (evita heredoc com backtick)
+          $lines = @(
+            "## DGOT Client $tag",
+            "",
+            "### Como instalar",
+            "1. Baixe o arquivo ``DGOT-Client-$tag.zip``",
+            "2. Extraia em qualquer pasta",
+            "3. Execute **DGOT.exe**",
+            "",
+            "### Requisitos",
+            "- Windows 10 ou superior (64-bit)",
+            "- DirectX 11",
+            "",
+            "> Versao compilada em $today - Servidor de Teste DGOT"
+          )
+          $lines -join "`n" | Out-File -FilePath "RELEASE_NOTES.md" -Encoding utf8 -NoNewline
 
           gh release create "$tag" "$zipName" `
             --repo "${{ github.repository }}" `
             --title "DGOT Client $tag" `
-            --notes @"
-          ## DGOT Client $tag
-
-          ### Como instalar
-          1. Baixe o arquivo `DGOT-Client-$tag.zip`
-          2. Extraia em qualquer pasta
-          3. Execute **DGOT.exe**
-
-          ### Requisitos
-          - Windows 10 ou superior (64-bit)
-          - DirectX 11
-
-          > Versão compilada em $(Get-Date -Format 'dd/MM/yyyy') — Servidor de Teste DGOT
-          "@ `
+            --notes-file "RELEASE_NOTES.md" `
             --latest
