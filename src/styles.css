@@ -1,0 +1,370 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-deep: var(--gold-deep);
+  --color-parchment: var(--parchment);
+  --color-parchment-dark: var(--parchment-dark);
+  --color-wood: var(--wood);
+  --color-wood-dark: var(--wood-dark);
+  --color-royal: var(--royal);
+  --color-royal-deep: var(--royal-deep);
+  --color-ember: var(--ember);
+  --font-display: "Press Start 2P", "Cinzel", monospace;
+  --font-body: "VT323", "Lora", monospace;
+}
+
+:root {
+  --radius: 0.5rem;
+
+  /* Fantasy palette */
+  --background: oklch(0.15 0.02 150);
+  --foreground: oklch(0.22 0.05 60);
+
+  --parchment: oklch(0.94 0.04 80);
+  --parchment-dark: oklch(0.88 0.06 75);
+
+  --gold: oklch(0.78 0.14 78);
+  --gold-bright: oklch(0.86 0.16 85);
+  --gold-deep: oklch(0.55 0.13 65);
+
+  --wood: oklch(0.45 0.08 50);
+  --wood-dark: oklch(0.28 0.06 45);
+
+  --royal: oklch(0.36 0.05 155);
+  --royal-deep: oklch(0.30 0.04 155);
+
+  --ember: oklch(0.65 0.2 38);
+
+  --card: var(--parchment);
+  --card-foreground: oklch(0.22 0.05 60);
+  --popover: var(--parchment);
+  --popover-foreground: oklch(0.22 0.05 60);
+  --primary: var(--royal-deep);
+  --primary-foreground: var(--gold-bright);
+  --secondary: var(--parchment-dark);
+  --secondary-foreground: oklch(0.22 0.05 60);
+  --muted: var(--parchment-dark);
+  --muted-foreground: oklch(0.4 0.05 60);
+  --accent: var(--gold);
+  --accent-foreground: var(--wood-dark);
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: var(--gold-deep);
+  --input: var(--parchment-dark);
+  --ring: var(--gold-bright);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+  }
+}
+
+/* ============ Ornate frame: gilded panel ============ */
+.frame-ornate {
+  position: relative;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--parchment) 100%, transparent) 0%,
+      color-mix(in oklab, var(--parchment-dark) 100%, transparent) 100%);
+  border: 2px solid var(--gold-deep);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--gold-bright) 60%, transparent),
+    inset 0 0 0 6px var(--parchment),
+    inset 0 0 0 7px var(--gold-deep),
+    0 8px 0 -2px var(--wood-dark),
+    0 14px 30px -8px rgba(0,0,0,0.5);
+  padding: 1.25rem 1.5rem;
+}
+.frame-ornate::before,
+.frame-ornate::after {
+  content: "";
+  position: absolute;
+  width: 28px; height: 28px;
+  background:
+    radial-gradient(circle at 30% 30%, var(--gold-bright), var(--gold-deep) 70%);
+  border: 2px solid var(--wood-dark);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+.frame-ornate::before { top: -10px; left: -10px; }
+.frame-ornate::after  { top: -10px; right: -10px; }
+
+/* Banner header bar (dark royal with gold) */
+.banner-header {
+  position: relative;
+  background: linear-gradient(180deg, var(--royal) 0%, var(--royal-deep) 100%);
+  color: var(--gold-bright);
+  border: 2px solid var(--gold-deep);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 1px var(--gold-bright),
+    inset 0 -10px 20px -10px rgba(0,0,0,0.6),
+    0 6px 0 -2px var(--wood-dark);
+  padding: 0.6rem 1rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.banner-header::before,
+.banner-header::after {
+  content: "";
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px;
+  background: radial-gradient(circle, var(--gold-bright), var(--gold-deep));
+  border-radius: 50%;
+  border: 1.5px solid var(--wood-dark);
+}
+.banner-header::before { left: 10px; }
+.banner-header::after  { right: 10px; }
+
+/* Side ribbon flag */
+.ribbon {
+  position: relative;
+  background: linear-gradient(180deg, var(--ember), oklch(0.45 0.18 28));
+  color: var(--parchment);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 0.5rem 0.75rem;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);
+  text-transform: uppercase;
+}
+
+/* Gilded button */
+.btn-gold {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wood-dark);
+  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-deep) 100%);
+  border: 2px solid var(--wood-dark);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 -3px 0 rgba(0,0,0,0.25),
+    0 4px 0 var(--wood-dark),
+    0 8px 16px -4px rgba(0,0,0,0.45);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.btn-gold:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn-gold:active { transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -2px 0 rgba(0,0,0,0.2),
+    0 2px 0 var(--wood-dark);
+}
+
+.btn-royal {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  background: linear-gradient(180deg, var(--royal) 0%, var(--royal-deep) 100%);
+  border: 2px solid var(--gold-deep);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 1px var(--gold-bright),
+    inset 0 -3px 0 rgba(0,0,0,0.35),
+    0 4px 0 var(--wood-dark),
+    0 8px 16px -4px rgba(0,0,0,0.45);
+}
+.btn-royal:hover { filter: brightness(1.1); }
+
+/* Nav pill */
+.nav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--parchment);
+  background:
+    linear-gradient(180deg, var(--royal) 0%, var(--royal-deep) 100%);
+  border: 2px solid var(--gold-deep);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 1px var(--gold),
+    inset 0 -4px 8px rgba(0,0,0,0.4),
+    0 4px 0 var(--wood-dark);
+  transition: transform .15s ease, filter .15s ease;
+}
+.nav-pill:hover { filter: brightness(1.12); transform: translateX(2px); }
+
+/* Divider with R medallion */
+.gilded-divider {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+.gilded-divider::before,
+.gilded-divider::after {
+  content: "";
+  flex: 1;
+  height: 6px;
+  background:
+    repeating-linear-gradient(90deg,
+      var(--gold-deep) 0 8px,
+      var(--gold-bright) 8px 14px,
+      var(--gold-deep) 14px 22px,
+      var(--royal) 22px 28px);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--wood-dark);
+}
+.gilded-divider span {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--wood-dark);
+  background: radial-gradient(circle at 30% 30%, var(--gold-bright), var(--gold-deep));
+  border: 2px solid var(--wood-dark);
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+/* News row hover */
+.news-row {
+  display: grid;
+  grid-template-columns: 32px 110px 1fr 16px;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: background .15s ease, border-color .15s ease;
+  cursor: pointer;
+}
+.news-row + .news-row { border-top: 1px dashed color-mix(in oklab, var(--gold-deep) 50%, transparent); }
+.news-row:hover {
+  background: color-mix(in oklab, var(--gold-bright) 30%, transparent);
+  border-color: var(--gold-deep);
+}
+
+/* Online dot */
+.online-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: oklch(0.75 0.2 145);
+  box-shadow: 0 0 8px oklch(0.75 0.2 145), inset 0 0 0 1px rgba(0,0,0,0.3);
+}
+
+/* Banner flag (top corners of page) — solid green with gold frame like buttons */
+.pennant {
+  width: 60px;
+  height: 90px;
+  background: var(--royal-deep);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  border: 2px solid var(--gold-deep);
+  box-shadow:
+    inset 0 0 0 1px var(--gold-bright),
+    inset 0 0 0 3px var(--gold-deep),
+    -2px 4px 8px rgba(0,0,0,0.4);
+}
+
+/* Floating bunting line */
+.bunting {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 80px;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0 30px,
+      var(--gold-bright) 30px 32px,
+      transparent 32px 60px);
+  mask: linear-gradient(180deg, black 50%, transparent);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Sky background overlay */
+.sky-overlay {
+  position: fixed; inset: 0;
+  background:
+    linear-gradient(180deg, oklch(0.18 0.02 150) 0%, oklch(0.14 0.02 152) 60%, oklch(0.10 0.015 155) 100%);
+  z-index: -2;
+}
+.scene-overlay {
+  position: fixed; inset: 0;
+  background-size: cover;
+  background-position: center bottom;
+  z-index: -1;
+  opacity: 0.95;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Tiny pixel-y card thumbnail */
+.thumb {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: linear-gradient(180deg, oklch(0.28 0.04 150), oklch(0.20 0.03 155));
+  border: 2px solid var(--gold-deep);
+  box-shadow: inset 0 0 0 1px var(--gold-bright), inset 0 -8px 12px rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.thumb img, .pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.pixel-text {
+  font-family: "Press Start 2P", monospace;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+}
